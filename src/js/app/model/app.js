@@ -366,6 +366,7 @@ export default Backbone.Model.extend({
         // resolve when all the key data for annotating is loaded, the
         // promiseLandmark wraps it and only resolves when both landmarks (if
         // applicable) and asset data are present
+
         if (newAssetPromise) {
             this.set('landmarks', null);
             return this._promiseLandmarksWithAsset(newAssetPromise);
@@ -392,6 +393,7 @@ export default Backbone.Model.extend({
         this.autoSaveWrapper(() => {
             this._switchToAsset(this.assetSource().setIndex(newIndex));
         });
+
     },
 
     reloadLandmarksFromPrevious: function () {

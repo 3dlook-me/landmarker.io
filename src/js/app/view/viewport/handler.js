@@ -105,6 +105,7 @@ export default function Handler () {
         this.cameraController.disable();
         // the clicked on landmark
         var landmarkSymbol = intersectsWithLms[0].object;
+        console.log(this.landmarkViews)
         // hunt through the landmarkViews for the right symbol
         for (var i = 0; i < this.landmarkViews.length; i++) {
             if (this.landmarkViews[i].symbol === landmarkSymbol) {
@@ -112,13 +113,19 @@ export default function Handler () {
             }
         }
         console.log('Viewport: finding the selected points');
-        lmPressedWasSelected = lmPressed.isSelected();
+        // if(lmPressed){
+            lmPressedWasSelected = lmPressed.isSelected();
+        // } else {
+        //     return;
+        // }
 
         if (!lmPressedWasSelected && !ctrl) {
             // this lm wasn't pressed before and we aren't holding
             // mutliselection down - deselect rest and select this
             console.log("normal click on a unselected lm - deselecting rest and selecting me");
-            lmPressed.selectAndDeselectRest();
+            // if(lmPressed){
+                lmPressed.selectAndDeselectRest();
+                // }
         } else if (ctrl && !lmPressedWasSelected) {
             lmPressed.select();
         }
@@ -150,6 +157,8 @@ export default function Handler () {
         $(document).on('mousemove.shiftDrag', shiftOnDrag);
         $(document).one('mouseup.viewportShift', shiftOnMouseUp);
     };
+
+
 
     // Catch all clicks and delegate to other handlers once user's intent
     // has been figured out
@@ -315,14 +324,14 @@ export default function Handler () {
             p = intersectsWithMesh[0].point.clone();
             // Convert the point back into the mesh space
             this.worldToLocal(p, true);
-
             if (
                 this.model.isEditingOn() &&
                 currentTargetLm &&
                 currentTargetLm.group() === this.model.landmarks() &&
                 !currentTargetLm.isEmpty()
             ) {
-                this.model.landmarks().setLmAt(currentTargetLm, p);
+                    this.model.landmarks().setLmAt(currentTargetLm, p);
+
             } else if (downEvent.button === 2) {
                 this.model.landmarks().insertNew(p);
             }
@@ -371,7 +380,7 @@ export default function Handler () {
             this.model.landmarks().tracker.record(dragStartPositions);
         }
 
-        this.clearCanvas();
+        // this.clearCanvas();
         dragged = false;
         dragStartPositions = [];
         isPressed = false;

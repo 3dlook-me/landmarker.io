@@ -278,6 +278,17 @@ export default Backbone.View.extend({
         this.$container.on('resetCamera', () => {
             this.resetCamera();
         });
+
+        //redraw listener
+        var changeDotFlagListener = _.extend({}, Backbone.Events);
+        changeDotFlagListener.listenTo(Backbone, 'redrawDots', (lm)=>{
+            this.redrawFlaggedLandmarks(lm)
+        });
+        changeDotFlagListener.listenTo(Backbone, 'preventDeselectChanging', (lm)=>{
+            this.preventDeselectChanging(lm)
+        });
+
+
     },
 
     width: function () {
@@ -302,7 +313,6 @@ export default Backbone.View.extend({
         up = meshPayload.up;
         front = meshPayload.front;
         this.mesh = mesh;
-
         if(mesh.geometry instanceof THREE.BufferGeometry) {
             // octree only makes sense if we are dealing with a true mesh
             // (not images). Such meshes are always BufferGeometry instances.
@@ -365,11 +375,13 @@ export default Backbone.View.extend({
         if (this.showConnectivity) {
             this.renderer.clearDepth(); // clear depth buffer
             // and render the connectivity
+
             this.renderer.render(this.sceneHelpers, this.sCamera);
         }
 
         // 2. Render the PIP image if in orthographic mode
         if (this.sCamera === this.sOCam) {
+
             var b = this.pipBounds();
             this.renderer.setClearColor(CLEAR_COLOUR_PIP, 1);
             this.renderer.setViewport(b.x, b.y, b.width, b.height);
@@ -447,7 +459,6 @@ export default Backbone.View.extend({
         this.editingOn = this.model.isEditingOn();
         this.clearCanvas();
         this._handler.setGroupSelected(false);
-
         // Manually bind to avoid useless function call (even with no effect)
         if (this.editingOn) {
             this.$el.on('mousemove', this._handler.onMouseMove);
@@ -497,6 +508,78 @@ export default Backbone.View.extend({
         }
     },
 
+
+    preventDeselectChanging: atomic.atomicOperation(function (landmark){
+        var that = this;
+
+        var landmarks = this.model.get('landmarks');
+        if (landmarks === null) {
+            return;
+        }
+
+        //setting new dot
+        that.landmarkViews[landmark.attributes.index] = new LandmarkTHREEView(
+            {
+                model: landmark,
+                viewport: that
+            }
+        );
+
+    }),
+
+    redrawFlaggedLandmarks: atomic.atomicOperation(function (landmark) {
+
+        //redraw 1 dot and 2(or 1) connectivities depends on flag
+
+        var that = this;
+
+        var landmarks = this.model.get('landmarks');
+        if (landmarks === null) {
+            return;
+        }
+
+        //setting new dot
+        that.landmarkViews[landmark.attributes.index] = new LandmarkTHREEView(
+            {
+                model: landmark,
+                viewport: that
+            }
+        );
+
+        //detecting connectivity of lines
+        var line1 = _.find(that.connectivityViews, (cnv, index)=>{
+                return cnv.model[0] == landmark;
+            });
+        var line2 = _.find(that.connectivityViews, (cnv)=>{
+                return cnv.model[1] == landmark;
+            });
+
+        //setting new connectivity
+        if(line1){
+            that.connectivityViews[that.connectivityViews.indexOf(line1)] = new LandmarkConnectionTHREEView(
+                {
+                    model: [landmark,
+                            line1.model[1]],
+                    viewport: that
+                }
+            );
+        }
+        if(line2){
+            that.connectivityViews[that.connectivityViews.indexOf(line2)] = new LandmarkConnectionTHREEView(
+                {
+                    model: [line2.model[0],
+                        landmark],
+                    viewport: that
+                }
+            );
+        }
+
+        Backbone.on('changeStatusInToolbar', function() {} );
+        Backbone.trigger('changeStatusInToolbar', landmark);
+
+
+    }),
+
     changeLandmarks: atomic.atomicOperation(function () {
         console.log('Viewport: landmarks have changed');
         var that = this;
@@ -534,6 +617,8 @@ export default Backbone.View.extend({
                     viewport: that
                 }));
         });
+        // console.log(landmarks)
+        // console.log()
 
     }),
 

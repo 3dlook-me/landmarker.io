@@ -10,7 +10,9 @@ export default Backbone.Model.extend({
             point: null,
             selected: false,
             nextAvailable: false,
-            index: null
+            index: null,
+            invisible: false,
+            bad: false
         };
     },
 
@@ -55,6 +57,8 @@ export default Backbone.Model.extend({
     deselect: function () {
         if(this.isSelected()) {
             this.set('selected', false);
+            Backbone.on('preventDeselectChanging', function() {} );
+            Backbone.trigger('preventDeselectChanging', this);
         }
     },
 

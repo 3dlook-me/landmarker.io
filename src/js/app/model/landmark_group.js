@@ -6,7 +6,7 @@ import { maskedArray } from '../lib/utils';
 import { notify } from '../view/notification';
 import Tracker from '../lib/tracker';
 import { atomicOperation } from './atomic';
-
+import _ from 'underscore';
 import Landmark from './landmark';
 
 // Define behavior shared between Lists and Groups
@@ -86,20 +86,24 @@ LandmarkLabel.prototype.toJSON = function () {
 
 // LandmarkGroup is the container for all the landmarks for a single asset.
 export default function LandmarkGroup (
-    points, connectivity, labels, id, type, server, tracker
+    points, connectivity, bad, invisible, labels, id, type, server, tracker
 ) {
     this.id = id;
     this.type = type;
     this.server = server;
     this.tracker = tracker || new Tracker();
-
     // 1. Build landmarks from points
     this.landmarks = points.map((p, index) => {
+        //p - x,y coord of point
         const [point, nDims] = _pointToVector(p);
-        const lmInitObj = {group: this, index, nDims, point};
+        var badSlug;
+        var invisibleSlug;
+        bad ? badSlug = bad[index] : badSlug = false;
+        invisible ? invisibleSlug = invisible[index] : invisibleSlug = false;
+        const lmInitObj = {group: this, point, index, nDims, bad: badSlug, invisible: invisibleSlug};
+        // const lmInitObj = {group: this, point, index, nDims};
         return new Landmark(lmInitObj);
     });
-
     // 2. Validate and assign connectivity (if there is any, it's not mandatory)
     this.connectivity = _validateConnectivity(this.landmarks.length,
                                               connectivity);
@@ -199,42 +203,55 @@ LandmarkGroup.prototype.deleteSelected = atomicOperation(function () {
     this.tracker.record(ops);
 });
 
-LandmarkGroup.prototype.insertNew = atomicOperation(function (v) {
+LandmarkGroup.prototype.insertNew = atomicOperation(function (v, invisible, bad) {
     const lm = this.nextAvailable();
     if (lm === null) {
         return null;    // nothing left to insert!
     }
+
+    if(!invisible && !bad){
+        var invisible = false;
+        var bad = false;
+    }
+
     // we are definitely inserting.
     this.deselectAll();
-    this.setLmAt(lm, v);
+    this.setLmAt(lm, v, invisible, bad);
     this.resetNextAvailable(lm);
 });
 
-LandmarkGroup.prototype.setLmAt = atomicOperation(function (lm, v) {
-
+LandmarkGroup.prototype.setLmAt = atomicOperation(function (lm, v, invisible, bad) {
     if (!v) {
         return;
     }
-
     this.tracker.record([
         [ lm.get('index'),
          lm.point() ? lm.point().clone() : undefined,
          v.clone() ]
     ]);
 
+    if(!invisible && !bad){
+        var invisible = false;
+        var bad = false;
+    }
+
     lm.set({
         point: v.clone(),
         selected: true,
         isEmpty: false,
-        nextAvailable: false
+        invisible: invisible,
+        bad: bad
     });
-});
 
+});
+//track
 LandmarkGroup.prototype.toJSON = function () {
     return {
         landmarks: {
             points: this.landmarks.map(lm => lm.toJSON()),
-            connectivity: this.connectivity
+            connectivity: this.connectivity,
+            invisible: this.landmarks.map(lm => lm.attributes.invisible),
+            bad: this.landmarks.map(lm => lm.attributes.bad)
         },
         labels: this.labels.map(label => label.toJSON()),
         gender: null,
@@ -258,6 +275,44 @@ LandmarkGroup.prototype.save = function (gender, typeOfPhoto) {
         });
 };
 
+LandmarkGroup.prototype.markAsBad = function () { // z - mark as bad
+        var selected = this.selected()[0];
+
+        if(selected){
+            var lm =  _.find(this.landmarks.reverse(), function(landmark){
+                return landmark.attributes.index == selected.attributes.index;
+            });
+
+            if(lm && selected) {
+                lm.set({
+                    bad: !selected.attributes.bad,
+                    point: selected.point()
+                })
+            }
+
+            Backbone.on('redrawDots', function() {} );
+            Backbone.trigger('redrawDots', lm);
+        }
+}
+
+LandmarkGroup.prototype.markAsInvisible = function () { // a - mark as invisible
+        var selected = this.selected()[0];
+
+        if(selected){
+            var lm =  _.find(this.landmarks.reverse(), function(landmark){
+                return landmark.attributes.index == selected.attributes.index;
+            });
+            if(lm && selected) {
+                lm.set({
+                    invisible: !selected.attributes.invisible,
+                    point: selected.point()
+                })
+            }
+
+            Backbone.on('redrawDots', function() {} );
+            Backbone.trigger('redrawDots', lm);
+        }
+}
 
 LandmarkGroup.prototype.undo = function () {
     this.tracker.undo((ops) => {
@@ -302,6 +357,8 @@ LandmarkGroup.parse = function (json, id, type, server, tracker) {
     return new LandmarkGroup(
         json.landmarks.points,
         json.landmarks.connectivity,
+        json.landmarks.bad,
+        json.landmarks.invisible,
         json.labels,
         id,
         type,
