@@ -441,7 +441,7 @@ export default function CameraController (pCam, oCam, oCamZoom, domElement) {
         // we need to check the deltaMode to determine the scale of the mouse
         // wheel reading.
         var scale = UNITS_FOR_MOUSE_WHEEL_DELTA_MODE[event.originalEvent.deltaMode];
-        tinput.set(0, 0, (-event.originalEvent.deltaY * MOUSE_WHEEL_SENSITIVITY * scale));
+        tinput.set(0, 0, (event.originalEvent.deltaY * MOUSE_WHEEL_SENSITIVITY * scale));
         zoom(tinput);
     }
 
