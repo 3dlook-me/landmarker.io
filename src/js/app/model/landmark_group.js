@@ -377,6 +377,8 @@ LandmarkGroup.prototype.markAsBad = function () { // z - mark as bad
             if(lastDot){
             this.landmarks[lastDot.attributes.index].setNextAvailable()
             }
+
+            this.tracker.recordState(this.toJSON(), false);
         }
 }
 
@@ -404,6 +406,8 @@ LandmarkGroup.prototype.markAsInvisible = function () { // a - mark as invisible
             if(lastDot){
             this.landmarks[lastDot.attributes.index].setNextAvailable()
             }
+
+            this.tracker.recordState(this.toJSON(), false);
         }
 }
 
