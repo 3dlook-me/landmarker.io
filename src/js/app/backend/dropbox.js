@@ -539,25 +539,30 @@ Dropbox.prototype.saveLandmarkGroup = function (id, type, json, gender, typeOfPh
         dropboxAPI: dataPost,
         data: json
     }).then(() => {
-        return postJSONData(`${API_URL}/files/search`, {headers: headers, data: data})
-    }).then((rs) => {
-        let result = JSON.parse(rs);
-        if (result["matches"].length > 0) {
-            return postJSONData(`${API_URL}/files/delete`, {
-                headers: headers,
-                data: {"path": result["matches"]["0"]["metadata"]["path_lower"]}
-            })
-        } else {
-            return
-        }
-    }).then(() => {
         return postJSONData(`${API_URL}/sharing/get_file_metadata`, {headers: headers, data: {"file": this._imgId, "actions": []}})
     }).then((rs) => {
         let result = JSON.parse(rs);
 
         dataSearch.url = result.preview_url
 
-        return postJSONData(`${API_URL}/files/save_url`, {headers: headers, data: dataSearch})
+        // return postJSONData(`${API_URL}/files/save_url`, {headers: headers, data: dataSearch})
+        return new Promise((resolve, reject) => {
+            postJSONData(`${API_URL}/files/copy`, {headers: headers, data: {
+                from_path: `${this._assetsPath}/${id}`,
+                to_path: `${this._assetsPath}/renamed/${split[0]}${gender}${typeOfPhoto}.${split[1]}`,
+                autorename: false,
+            }})
+            .then((res) => {
+                console.log(res);
+                resolve();
+            })
+            .catch((err) => {
+                if (err.message === 'Conflict') {
+                    resolve();
+                }
+                reject(err);
+            });
+        })
 
     })
 };
