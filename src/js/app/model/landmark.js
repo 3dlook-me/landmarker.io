@@ -91,17 +91,9 @@ export default Backbone.Model.extend({
         var point;
         if (!this.isEmpty()) {
             point = this.point();
-            if (this.nDims() === 2) {
-                pointJSON = [point.x, point.y];
-            } else {
-                pointJSON = [point.x, point.y, point.z];
-            }
+            pointJSON = [point.x, point.y];
         } else {
-            if (this.nDims() === 2) {
-                pointJSON = [null, null];
-            } else {
-                pointJSON = [null, null, null];
-            }
+            pointJSON = [null, null];
         }
         return pointJSON;
     }
