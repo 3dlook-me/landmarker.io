@@ -19,6 +19,19 @@ export default Backbone.Model.extend({
             mode: 'mesh',
             gender: undefined,
             setTypeOfPhoto: undefined,
+
+            age: undefined,
+            wearBiceps: undefined,
+            wearChest: undefined,
+            wearUnderChest: undefined,
+            wearWaist: undefined,
+            wearHips: undefined,
+            wearLowHips: undefined,
+            wearThigh: undefined,
+            wearKnee: undefined,
+            wearCalf: undefined,
+            wearAnkle: undefined,
+
             connectivityOn: true,
             editingOn: true,
             autoSaveOn: false,
@@ -47,6 +60,73 @@ export default Backbone.Model.extend({
     },
     getTypeOfPhoto: function () {
         return this.get('typeOfPhoto');
+    },
+
+    setAge: function (age) {
+        return this.set('age', age);
+    },
+    getAge: function () {
+        return this.get('age');
+    },
+    setWearBiceps: function (wearBiceps) {
+        return this.set('wearBiceps', wearBiceps);
+    },
+    getWearBiceps: function () {
+        return this.get('wearBiceps');
+    },
+    setWearChest: function (wearChest) {
+        return this.set('wearChest', wearChest);
+    },
+    getWearChest: function () {
+        return this.get('wearChest');
+    },
+    setWearUnderChest: function (wearUnderChest) {
+        return this.set('wearUnderChest', wearUnderChest);
+    },
+    getWearUnderChest: function () {
+        return this.get('wearUnderChest');
+    },
+    setWearWaist: function (wearWaist) {
+        return this.set('wearWaist', wearWaist);
+    },
+    getWearWaist: function () {
+        return this.get('wearWaist');
+    },
+    setWearHips: function (wearHips) {
+        return this.set('wearHips', wearHips);
+    },
+    getWearHips: function () {
+        return this.get('wearHips');
+    },
+    setWearLowHips: function (wearLowHips) {
+        return this.set('wearLowHips', wearLowHips);
+    },
+    getWearLowHips: function () {
+        return this.get('wearLowHips');
+    },
+    setWearThigh: function (wearThigh) {
+        return this.set('wearThigh', wearThigh);
+    },
+    getWearThigh: function () {
+        return this.get('wearThigh');
+    },
+    setWearKnee: function (wearKnee) {
+        return this.set('wearKnee', wearKnee);
+    },
+    getWearKnee: function () {
+        return this.get('wearKnee');
+    },
+    setWearCalf: function (wearCalf) {
+        return this.set('wearCalf', wearCalf);
+    },
+    getWearCalf: function () {
+        return this.get('wearCalf');
+    },
+    setWearAnkle: function (wearAnkle) {
+        return this.set('wearAnkle', wearAnkle);
+    },
+    getWearAnkle: function () {
+        return this.get('wearAnkle');
     },
 
     toggleAutoSave: function () {
@@ -289,6 +369,17 @@ export default Backbone.Model.extend({
     autoSaveWrapper: function (fn) {
         const gender = this.getGender();
         const typeOfPhoto = this.getTypeOfPhoto();
+        const age = this.getAge();
+        const wearBiceps = this.getWearBiceps();
+        const wearChest = this.getWearChest();
+        const wearUnderChest = this.getWearUnderChest();
+        const wearWaist = this.getWearWaist();
+        const wearHips = this.getWearHips();
+        const wearLowHips = this.getWearLowHips();
+        const wearThigh = this.getWearThigh();
+        const wearKnee = this.getWearKnee();
+        const wearCalf = this.getWearCalf();
+        const wearAnkle = this.getWearAnkle();
         const lms = this.landmarks();
         if (lms && gender && (typeOfPhoto || typeOfPhoto == '') && !lms.tracker.isUpToDate()) {
             if (!this.isAutoSaveOn()) {
@@ -296,7 +387,18 @@ export default Backbone.Model.extend({
             } else {
                 console.log("saveeeeeeeeee")
 
-                lms.save(gender, typeOfPhoto).then(fn);
+                lms.save(gender, typeOfPhoto, age, {
+                    biceps: wearBiceps,
+                    chest: wearChest,
+                    under_chest: wearUnderChest,
+                    waist: wearWaist,
+                    hips: wearHips,
+                    low_hips: wearLowHips,
+                    thigh: wearThigh,
+                    knee: wearKnee,
+                    calf: wearCalf,
+                    ankle: wearAnkle,
+                }).then(fn);
             }
         } else {
             fn();
@@ -332,6 +434,19 @@ export default Backbone.Model.extend({
         ).then((json) => {
             this.setGender(json.gender);
             this.setTypeOfPhoto(json.typeOfPhoto);
+            this.setAge(json.age);
+            if (json.wear) {
+                this.setWearBiceps(json.wear.biceps);
+                this.setWearChest(json.wear.chest);
+                this.setWearUnderChest(json.wear.under_chest);
+                this.setWearWaist(json.wear.waist);
+                this.setWearHips(json.wear.hips);
+                this.setWearLowHips(json.wear.low_hips);
+                this.setWearThigh(json.wear.thigh);
+                this.setWearKnee(json.wear.knee);
+                this.setWearCalf(json.wear.calf);
+                this.setWearAnkle(json.wear.ankle);
+            }
             return LandmarkGroup.parse(
                 json,
                 this.asset().id,
@@ -407,6 +522,19 @@ export default Backbone.Model.extend({
                 ).then((json) => {
                     this.setGender(json.gender);
                     this.setTypeOfPhoto(json.typeOfPhoto);
+                    this.setAge(json.age);
+                    if (json.wear) {
+                        this.setWearBiceps(json.wear.biceps);
+                        this.setWearChest(json.wear.chest);
+                        this.setWearUnderChest(json.wear.under_chest);
+                        this.setWearWaist(json.wear.waist);
+                        this.setWearHips(json.wear.hips);
+                        this.setWearLowHips(json.wear.low_hips);
+                        this.setWearThigh(json.wear.thigh);
+                        this.setWearKnee(json.wear.knee);
+                        this.setWearCalf(json.wear.calf);
+                        this.setWearAnkle(json.wear.ankle);
+                    }
                     lms.tracker.recordState(lms.toJSON());
                     lms.restore(json, true);
                     lms.tracker.recordState(lms.toJSON(), false, true);

@@ -143,6 +143,24 @@
     text-align: center;
     justify-content: space-between;
     align-items: center;
+    font-size: 13px;
+}
+.Toolbar-Two-Cols {
+    display: flex;
+    flex-wrap: wrap;
+
+    .Toolbar-Row {
+        width: 50%;
+    }
+
+    .Toolbar-Row > div {
+        font-size: 13px;
+        text-align: left;
+    }
+
+    .Toolbar-Row > select {
+        width: 100px;
+    }
 }
 .LandMark-Changed{
     color:black;

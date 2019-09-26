@@ -29,7 +29,7 @@ export const LandmarkView = Backbone.View.extend({
     render: function () {
         const html = $("<div></div>");
         html.addClass("Lm", this.model.isEmpty());
-        var indx = parseInt(this.model.attributes.index) + 1;
+        var indx = parseInt(this.model.attributes.index);
         html.html('<div class="LM-Value-Label">' + indx.toString() + '</div>');
         html.toggleClass("Lm-Empty", this.model.isEmpty());
         html.toggleClass("Lm-Value", !this.model.isEmpty());
@@ -250,13 +250,35 @@ export const ActionsView = Backbone.View.extend({
 
         let gender = this.app.getGender();
         let typeOfPhoto = this.app.getTypeOfPhoto();
+        let age = this.app.getAge();
+        const wearBiceps = this.app.getWearBiceps();
+        const wearChest = this.app.getWearChest();
+        const wearUnderChest = this.app.getWearUnderChest();
+        const wearWaist = this.app.getWearWaist();
+        const wearHips = this.app.getWearHips();
+        const wearLowHips = this.app.getWearLowHips();
+        const wearThigh = this.app.getWearThigh();
+        const wearKnee = this.app.getWearKnee();
+        const wearCalf = this.app.getWearCalf();
+        const wearAnkle = this.app.getWearAnkle();
         if (gender && (typeOfPhoto || typeOfPhoto == "")) {
             evt.stopPropagation();
             $("#assetPager").find("#next").prop("disabled", false);
 
             $("#genderPanel").find("#errorRadio").removeClass('error-msg-show')
             this.$el.find('#save').addClass('Button--Disabled');
-            this.model.save(gender, typeOfPhoto).then(() => {
+            this.model.save(gender, typeOfPhoto, age, {
+                biceps: wearBiceps,
+                chest: wearChest,
+                under_chest: wearUnderChest,
+                waist: wearWaist,
+                hips: wearHips,
+                low_hips: wearLowHips,
+                thigh: wearThigh,
+                knee: wearKnee,
+                calf: wearCalf,
+                ankle: wearAnkle,
+            }).then(() => {
                 this.$el.find('#save').removeClass('Button--Disabled');
             }, () => {
                 this.$el.find('#save').removeClass('Button--Disabled');
@@ -440,6 +462,292 @@ export const TypeOfPhotoToggle = Backbone.View.extend({
 
 });
 
+export const AgeSelect = Backbone.View.extend({
+
+    el: '#ageRow',
+
+    events: {
+        'change #age': "ageChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'ageChange');
+        this.render();
+    },
+
+    render: function () {
+        let age = this.model.getAge();
+        this.$el.find('#age').val(age);
+    },
+
+    ageChange: function (event) {
+        const val = this.$el.find('#age').val();
+        this.model.setAge(val);
+    },
+
+});
+
+export const WearChestSelect = Backbone.View.extend({
+
+    el: '#wearChestRow',
+
+    events: {
+        'change #wearChest': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearChest();
+        this.$el.find('#wearChest').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearChest').val();
+        this.model.setWearChest(val);
+    },
+
+});
+
+export const WearBicepsSelect = Backbone.View.extend({
+
+    el: '#wearBicepsRow',
+
+    events: {
+        'change #wearBiceps': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearBiceps();
+        this.$el.find('#wearBiceps').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearBiceps').val();
+        this.model.setWearBiceps(val);
+    },
+
+});
+
+export const WearUnderChestSelect = Backbone.View.extend({
+
+    el: '#wearUnderChestRow',
+
+    events: {
+        'change #wearUnderChest': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearUnderChest();
+        this.$el.find('#wearUnderChest').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearUnderChest').val();
+        this.model.setWearUnderChest(val);
+    },
+
+});
+
+export const WearWaistSelect = Backbone.View.extend({
+
+    el: '#wearWaistRow',
+
+    events: {
+        'change #wearWaist': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearWaist();
+        this.$el.find('#wearWaist').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearWaist').val();
+        this.model.setWearWaist(val);
+    },
+
+});
+
+export const WearHipsSelect = Backbone.View.extend({
+
+    el: '#wearHipsRow',
+
+    events: {
+        'change #wearHips': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearHips();
+        this.$el.find('#wearHips').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearHips').val();
+        this.model.setWearHips(val);
+    },
+
+});
+
+export const WearLowHipsSelect = Backbone.View.extend({
+
+    el: '#wearLowHipsRow',
+
+    events: {
+        'change #wearLowHips': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearLowHips();
+        this.$el.find('#wearLowHips').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearLowHips').val();
+        this.model.setWearLowHips(val);
+    },
+
+});
+
+export const WearThighSelect = Backbone.View.extend({
+
+    el: '#wearThighRow',
+
+    events: {
+        'change #wearThigh': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearThigh();
+        this.$el.find('#wearThigh').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearThigh').val();
+        this.model.setWearThigh(val);
+    },
+
+});
+
+export const WearKneeSelect = Backbone.View.extend({
+
+    el: '#wearKneeRow',
+
+    events: {
+        'change #wearKnee': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearKnee();
+        this.$el.find('#wearKnee').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearKnee').val();
+        this.model.setWearKnee(val);
+    },
+
+});
+
+export const WearCalfSelect = Backbone.View.extend({
+
+    el: '#wearCalfRow',
+
+    events: {
+        'change #wearCalf': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearCalf();
+        this.$el.find('#wearCalf').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearCalf').val();
+        this.model.setWearCalf(val);
+    },
+
+});
+
+export const WearAnkleSelect = Backbone.View.extend({
+
+    el: '#wearAnkleRow',
+
+    events: {
+        'change #wearAnkle': "valueChange",
+    },
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+        this.app = app;
+        _.bindAll(this, 'render', 'valueChange');
+        this.render();
+    },
+
+    render: function () {
+        const val = this.model.getWearAnkle();
+        this.$el.find('#wearAnkle').val(val);
+    },
+
+    valueChange: function (event) {
+        const val = this.$el.find('#wearAnkle').val();
+        this.model.setWearAnkle(val);
+    },
+
+});
+
 export default Backbone.View.extend({
 
     initialize: function () {
@@ -482,6 +790,17 @@ export default Backbone.View.extend({
         this.lmView = new LandmarkGroupListView({collection: lms.labels});
         this.genderToggle = new GenderToggle({model: this.model});
         this.typeOfPhotoToggle = new TypeOfPhotoToggle({model: this.model});
+        this.ageSelect = new AgeSelect({model: this.model});
+        this.wearChestSelect = new WearChestSelect({model: this.model});
+        this.wearBicepsSelect = new WearBicepsSelect({model: this.model});
+        this.wearUnderChestSelect = new WearUnderChestSelect({model: this.model});
+        this.wearWaistSelect = new WearWaistSelect({model: this.model});
+        this.wearHipsSelect = new WearHipsSelect({model: this.model});
+        this.wearLowHipsSelect = new WearLowHipsSelect({model: this.model});
+        this.wearThighSelect = new WearThighSelect({model: this.model});
+        this.wearKneeSelect = new WearKneeSelect({model: this.model});
+        this.wearCalfSelect = new WearCalfSelect({model: this.model});
+        this.wearAnkleSelect = new WearAnkleSelect({model: this.model});
         $('#landmarksPanel').html(this.lmView.render().$el);
     }
 });

@@ -517,52 +517,15 @@ Dropbox.prototype.fetchLandmarkGroup = function (id, type) {
         });
     });
 };
-Dropbox.prototype.saveLandmarkGroup = function (id, type, json, gender, typeOfPhoto) {
+Dropbox.prototype.saveLandmarkGroup = function (id, type, json, gender, typeOfPhoto, age) {
     const headers = this.headers();
     let path = `${this._assetsPath}/landmarks/${id}_${type}.ljson`;
-    let data = {
-        "path": `${this._assetsPath}/renamed`,
-        "query": `${id}`,
-        "start": 0,
-        "max_results": 500,
-        "mode": "filename"
-    };
-
-    let split = id.split(".");
     let dataPost = {"path": path, "mode": "overwrite", "autorename": false};
-    let dataSearch = {
-        "path": `${this._assetsPath}/renamed/${split[0]}${gender}${typeOfPhoto}.${split[1]}`,
-        "url": ''
-    };
     return postUploadJSON(`${CONTENTS_URL}/files/upload`, {
         headers: headers,
         dropboxAPI: dataPost,
         data: json
     }).then(() => {
         return postJSONData(`${API_URL}/sharing/get_file_metadata`, {headers: headers, data: {"file": this._imgId, "actions": []}})
-    }).then((rs) => {
-        let result = JSON.parse(rs);
-
-        dataSearch.url = result.preview_url
-
-        // return postJSONData(`${API_URL}/files/save_url`, {headers: headers, data: dataSearch})
-        return new Promise((resolve, reject) => {
-            postJSONData(`${API_URL}/files/copy`, {headers: headers, data: {
-                from_path: `${this._assetsPath}/${id}`,
-                to_path: `${this._assetsPath}/renamed/${split[0]}${gender}${typeOfPhoto}.${split[1]}`,
-                autorename: false,
-            }})
-            .then((res) => {
-                console.log(res);
-                resolve();
-            })
-            .catch((err) => {
-                if (err.message === 'Conflict') {
-                    resolve();
-                }
-                reject(err);
-            });
-        })
-
-    })
+    });
 };
