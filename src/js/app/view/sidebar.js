@@ -250,7 +250,7 @@ export const ActionsView = Backbone.View.extend({
 
         let gender = this.app.getGender();
         let typeOfPhoto = this.app.getTypeOfPhoto();
-        let age = this.app.getAge();
+        const age = this.app.getAge();
         const wearBiceps = this.app.getWearBiceps();
         const wearChest = this.app.getWearChest();
         const wearUnderChest = this.app.getWearUnderChest();
@@ -261,7 +261,9 @@ export const ActionsView = Backbone.View.extend({
         const wearKnee = this.app.getWearKnee();
         const wearCalf = this.app.getWearCalf();
         const wearAnkle = this.app.getWearAnkle();
-        if (gender && (typeOfPhoto || typeOfPhoto == "")) {
+        if (gender && (typeOfPhoto || typeOfPhoto == "")
+            && age && wearBiceps && wearChest && wearUnderChest && wearWaist
+            && wearHips && wearLowHips && wearThigh && wearKnee && wearCalf && wearAnkle) {
             evt.stopPropagation();
             $("#assetPager").find("#next").prop("disabled", false);
 
