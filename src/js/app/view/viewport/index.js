@@ -305,7 +305,7 @@ export default Backbone.View.extend({
                 $('#points-select').html(`
                     <option value="36"">36</option>
                     <option value="37">37</option>
-                    <option selected="selected value="65">65</option>
+                    <option selected="selected value="68">68</option>
                 `)
             } else if($('#orientation-select').val() == '0') {
                 $('#contour-select').html('<option value="cycle" selected="selected">Cycle</option><option value="circuit">Circuit</option>')
@@ -318,7 +318,7 @@ export default Backbone.View.extend({
             } else if($('#orientation-select').val() == '0' && $('#contour-select').val() == 'cycle') {
                 $('#points-select').html('<option value="49" selected="selected">49</option>')
             } else if($('#orientation-select').val() == '0' && $('#contour-select').val() == 'circuit'){
-                $('#points-select').html('<option value="59" selected="selected">59</option><option value="87" selected="selected">87</option>');
+                $('#points-select').html('<option value="59" selected="selected">59</option><option value="93" selected="selected">93</option>');
             }
         });
 
