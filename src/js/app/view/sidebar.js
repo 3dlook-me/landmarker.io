@@ -153,6 +153,14 @@ export const LandmarkGroupView = Backbone.View.extend({
         this.cleanup();
         this.$el.empty();
         this.$el.addClass('LmGroup');
+
+        let points = this.model.landmarks.length;
+
+        showNewElements();
+        if(points != 93 && points != 68) {
+            hideNewElements();
+        }
+
         this.landmarkList = new LandmarkListView(
             {collection: this.model.landmarks, labelIndex: this.labelIndex});
         this.label = new LandmarkGroupLabelView({model: this.model});
@@ -261,9 +269,19 @@ export const ActionsView = Backbone.View.extend({
         const wearKnee = this.app.getWearKnee();
         const wearCalf = this.app.getWearCalf();
         const wearAnkle = this.app.getWearAnkle();
-        if (gender && (typeOfPhoto || typeOfPhoto == "")
-            && age && wearBiceps && wearChest && wearUnderChest && wearWaist
-            && wearHips && wearLowHips && wearThigh && wearKnee && wearCalf && wearAnkle) {
+        const lmg = this.app.getLandmarks();
+
+        const points = lmg.landmarks.length;
+
+        const firstConditionPart = gender && (typeOfPhoto || typeOfPhoto == "");
+        let secondConditionPart = true;
+
+        if(points === 93 || points === 68) {
+            secondConditionPart = age && wearBiceps && wearChest && wearUnderChest && wearWaist
+                && wearHips && wearLowHips && wearThigh && wearKnee && wearCalf && wearAnkle;
+        }
+
+        if (firstConditionPart && secondConditionPart) {
             evt.stopPropagation();
             $("#assetPager").find("#next").prop("disabled", false);
 
@@ -506,7 +524,7 @@ export const WearChestSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearChest();
-        this.$el.find('#wearChest').val(val);
+        this.$el.find('#wearChest').val(val).change();
     },
 
     valueChange: function (event) {
@@ -532,7 +550,7 @@ export const WearBicepsSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearBiceps();
-        this.$el.find('#wearBiceps').val(val);
+        this.$el.find('#wearBiceps').val(val).change();
     },
 
     valueChange: function (event) {
@@ -558,7 +576,7 @@ export const WearUnderChestSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearUnderChest();
-        this.$el.find('#wearUnderChest').val(val);
+        this.$el.find('#wearUnderChest').val(val).change();
     },
 
     valueChange: function (event) {
@@ -584,7 +602,7 @@ export const WearWaistSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearWaist();
-        this.$el.find('#wearWaist').val(val);
+        this.$el.find('#wearWaist').val(val).change();
     },
 
     valueChange: function (event) {
@@ -610,7 +628,7 @@ export const WearHipsSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearHips();
-        this.$el.find('#wearHips').val(val);
+        this.$el.find('#wearHips').val(val).change();
     },
 
     valueChange: function (event) {
@@ -636,7 +654,7 @@ export const WearLowHipsSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearLowHips();
-        this.$el.find('#wearLowHips').val(val);
+        this.$el.find('#wearLowHips').val(val).change();
     },
 
     valueChange: function (event) {
@@ -662,7 +680,7 @@ export const WearThighSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearThigh();
-        this.$el.find('#wearThigh').val(val);
+        this.$el.find('#wearThigh').val(val).change();
     },
 
     valueChange: function (event) {
@@ -688,7 +706,7 @@ export const WearKneeSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearKnee();
-        this.$el.find('#wearKnee').val(val);
+        this.$el.find('#wearKnee').val(val).change();
     },
 
     valueChange: function (event) {
@@ -714,7 +732,7 @@ export const WearCalfSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearCalf();
-        this.$el.find('#wearCalf').val(val);
+        this.$el.find('#wearCalf').val(val).change();
     },
 
     valueChange: function (event) {
@@ -740,7 +758,7 @@ export const WearAnkleSelect = Backbone.View.extend({
 
     render: function () {
         const val = this.model.getWearAnkle();
-        this.$el.find('#wearAnkle').val(val);
+        this.$el.find('#wearAnkle').val(val).change();
     },
 
     valueChange: function (event) {
@@ -749,6 +767,34 @@ export const WearAnkleSelect = Backbone.View.extend({
     },
 
 });
+
+function showNewElements() {
+    $('#ageRow').show();
+    $('#wearBicepsRow').show();
+    $('#wearChestRow').show();
+    $('#wearUnderChestRow').show();
+    $('#wearWaistRow').show();
+    $('#wearHipsRow').show();
+    $('#wearLowHipsRow').show();
+    $('#wearThighRow').show();
+    $('#wearKneeRow').show();
+    $('#wearCalfRow').show();
+    $('#wearAnkleRow').show();
+}
+
+function hideNewElements() {
+    $('#ageRow').hide();
+    $('#wearBicepsRow').hide();
+    $('#wearChestRow').hide();
+    $('#wearUnderChestRow').hide();
+    $('#wearWaistRow').hide();
+    $('#wearHipsRow').hide();
+    $('#wearLowHipsRow').hide();
+    $('#wearThighRow').hide();
+    $('#wearKneeRow').hide();
+    $('#wearCalfRow').hide();
+    $('#wearAnkleRow').hide();
+}
 
 export default Backbone.View.extend({
 

@@ -129,6 +129,10 @@ export default Backbone.Model.extend({
         return this.get('wearAnkle');
     },
 
+    getLandmarks: function () {
+        return this.get('landmarks');
+    },
+
     toggleAutoSave: function () {
         return this.set('autoSaveOn', !this.isAutoSaveOn());
     },

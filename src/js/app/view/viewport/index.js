@@ -297,28 +297,69 @@ export default Backbone.View.extend({
 
 
         //Change preset form
+        function showNewElements() {
+            $('#ageRow').show();
+            $('#wearBicepsRow').show();
+            $('#wearChestRow').show();
+            $('#wearUnderChestRow').show();
+            $('#wearWaistRow').show();
+            $('#wearHipsRow').show();
+            $('#wearLowHipsRow').show();
+            $('#wearThighRow').show();
+            $('#wearKneeRow').show();
+            $('#wearCalfRow').show();
+            $('#wearAnkleRow').show();
+        }
+
+        function hideNewElements() {
+            $('#ageRow').hide();
+            $('#wearBicepsRow').hide();
+            $('#wearChestRow').hide();
+            $('#wearUnderChestRow').hide();
+            $('#wearWaistRow').hide();
+            $('#wearHipsRow').hide();
+            $('#wearLowHipsRow').hide();
+            $('#wearThighRow').hide();
+            $('#wearKneeRow').hide();
+            $('#wearCalfRow').hide();
+            $('#wearAnkleRow').hide();
+        }
 
         document.getElementById("orientation-select").addEventListener("change", function(){
             $('#choosepreset-button').slideDown();
+            showNewElements();
             if($('#orientation-select').val() == '1'){
                 $('#contour-select').html('<option value="cycle" selected="selected">Cycle</option>')
                 $('#points-select').html(`
                     <option value="36"">36</option>
                     <option value="37">37</option>
                     <option selected="selected value="68">68</option>
-                `)
+                `);
             } else if($('#orientation-select').val() == '0') {
-                $('#contour-select').html('<option value="cycle" selected="selected">Cycle</option><option value="circuit">Circuit</option>')
-                $('#points-select').html('<option value="49" selected="selected">49</option>')
+                $('#contour-select').html('<option value="cycle" selected="selected">Cycle</option><option value="circuit">Circuit</option>');
+                $('#points-select').html('<option value="49" selected="selected">49</option>');
+                hideNewElements();
             }
         });
         document.getElementById("contour-select").addEventListener("change", function(){
+            showNewElements();
             if($('#orientation-select').val() == '1' && $('#contour-select').val() == 'cycle'){
                 $('#points-select').html('<option value="36" selected="selected">36</option><option value="37">37</option>')
+                hideNewElements();
             } else if($('#orientation-select').val() == '0' && $('#contour-select').val() == 'cycle') {
                 $('#points-select').html('<option value="49" selected="selected">49</option>')
+                hideNewElements();
             } else if($('#orientation-select').val() == '0' && $('#contour-select').val() == 'circuit'){
                 $('#points-select').html('<option value="59" selected="selected">59</option><option value="93" selected="selected">93</option>');
+            }
+        });
+
+        document.getElementById("points-select").addEventListener("change", function (){
+            const val = $(this).val();
+
+            showNewElements();
+            if(val != 93 && val != 68) {
+                hideNewElements();
             }
         });
 
