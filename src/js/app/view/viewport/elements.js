@@ -40,6 +40,7 @@ export const LandmarkTHREEView = Backbone.View.extend({
         this.app = this.viewport.model;
         this.listenTo(this.app, "change:landmarkSize", this.changeLandmarkSize);
         this.symbol = null; // a THREE object that represents this landmark.
+        this.spritey = null; // a THREE object that represents this landmark.
         // null if the landmark isEmpty
         this.render();
     },
@@ -59,11 +60,16 @@ export const LandmarkTHREEView = Backbone.View.extend({
             if (!this.model.isEmpty()) {
                 // and there should be! Make it and update it
                 this.symbol = this.createSphere(this.model.get('point'), true);
+                this.spritey = this.createTextSprite(this.model.get('index'), {
+                    fontsize: 60,
+                    fontface: "Georgia",
+                });
                 this.updateSymbol();
                 // trigger changeLandmarkSize to make sure sizing is correct
                 this.changeLandmarkSize();
                 // and add it to the scene
                 this.viewport.sLms.add(this.symbol);
+                this.viewport.sLms.add(this.spritey);
             }
         }
         // tell our viewport to update
@@ -71,7 +77,6 @@ export const LandmarkTHREEView = Backbone.View.extend({
     },
 
     createSphere: function (v, radius, selected) {
-        //console.log('creating sphere of radius ' + radius);
         if(this.model.attributes.bad){
             lmMaterialForSelected.false = new THREE.MeshBasicMaterial({color: LM_CONNECTION_LINE_COLOR_BAD})
         } else if(this.model.attributes.invisible) {
@@ -85,16 +90,74 @@ export const LandmarkTHREEView = Backbone.View.extend({
         return landmark;
     },
 
+    createTextSprite(message, parameters) {
+        if ( parameters === undefined ) parameters = {};
+
+        var fontface = parameters.hasOwnProperty("fontface") ?
+            parameters["fontface"] : "Arial";
+
+        var fontsize = parameters.hasOwnProperty("fontsize") ?
+            parameters["fontsize"] : 18;
+
+        var borderThickness = parameters.hasOwnProperty("borderThickness") ?
+            parameters["borderThickness"] : 10;
+
+        var borderColor = parameters.hasOwnProperty("borderColor") ?
+            parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
+
+        var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+            parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
+
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        context.font = "Bold " + fontsize + "px " + fontface;
+
+        // background color
+        context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+                                        + backgroundColor.b + "," + backgroundColor.a + ")";
+        // border color
+        context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+                                        + borderColor.b + "," + borderColor.a + ")";
+
+        context.lineWidth = borderThickness;
+
+        // text color
+        context.fillStyle = "rgba(255, 75, 255, 1.0)";
+
+        context.fillText(message, borderThickness, fontsize + borderThickness);
+
+        // canvas contents will be used for a texture
+        var texture = new THREE.Texture(canvas)
+        texture.needsUpdate = true;
+
+        var spriteMaterial = new THREE.SpriteMaterial(
+            { map: texture, useScreenCoordinates: false } );
+        var sprite = new THREE.Sprite( spriteMaterial );
+        sprite.scale.set(100,50,1.0);
+        return sprite;
+    },
+
     updateSymbol: function () {
         this.symbol.position.copy(this.model.point());
         var selected = this.model.isSelected();
         this.symbol.material = lmMaterialForSelected[selected];
+        this.spritey.position.copy(this.model.point());
+
+        if (selected) {
+            this.spritey.visible = true;
+        } else {
+            this.spritey.visible = false;
+        }
     },
 
     dispose: function () {
         if (this.symbol) {
             this.viewport.sLms.remove(this.symbol);
             this.symbol = null;
+        }
+        if (this.spritey) {
+            this.viewport.sLms.remove(this.spritey);
+            this.spritey = null;
         }
     },
 
