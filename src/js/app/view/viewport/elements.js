@@ -246,7 +246,9 @@ export const LandmarkConnectionTHREEView = Backbone.View.extend({
                 linewidth: 1
             });
         // }
-        return new THREE.Line(geometry, lineMaterial);
+        var line = new THREE.Line(geometry, lineMaterial);
+        line.frustumCulled = false;
+        return line;
     },
 
     dispose: function () {
