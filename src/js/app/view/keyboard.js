@@ -163,6 +163,17 @@ export default function KeyboardShortcutsHandler (app, viewport) {
             if (lms) {
                 lms.save();
             }
+        } else if (evt.which === 90 && (evt.metaKey || evt.ctrlKey)) {
+            lms = app.landmarks();
+            if (lms && lms.tracker.canUndo()) {
+                lms.undo();
+            }
+        } else if (evt.which === 89 && (evt.metaKey || evt.ctrlKey)) {
+            evt.preventDefault();
+            lms = app.landmarks();
+            if (lms && lms.tracker.canRedo()) {
+                lms.redo();
+            }
         }
     };
 }
