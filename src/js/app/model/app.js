@@ -540,6 +540,19 @@ export default Backbone.Model.extend({
                         this.setWearAnkle(json.wear.ankle);
                     }
                     lms.tracker.recordState(lms.toJSON());
+                    // adjust points to be within image bounds
+                    var image = this.asset().texture.map.image;
+                    for (let i = 0; i < json.landmarks.points.length; i++) {
+                        const p = json.landmarks.points[i];
+
+                        if (p[1] > image.width) {
+                            p[1] = image.width;
+                        }
+
+                        if (p[0] > image.height) {
+                            p[0] = image.height;
+                        }
+                    }
                     lms.restore(json, true);
                     lms.tracker.recordState(lms.toJSON(), false, true);
                 }, () => {
