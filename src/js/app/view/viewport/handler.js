@@ -227,7 +227,7 @@ export default function Handler () {
             }
         } else if (event.button === 2) { // Right click
             if (
-                intersectsWithLms.length <= 0 &&
+                intersectsWithLms.length >= 0 &&
                 intersectsWithMesh.length > 0
             ) {
                 this.model.landmarks().deselectAll();

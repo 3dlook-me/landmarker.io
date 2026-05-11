@@ -8,9 +8,21 @@
  * API v1 to API v2 migration
  */
 'use strict';
-// const API_KEY = 'lar7e1dae96efyx',
 
-const API_KEY = 'lar7e1dae96efyx',
+/**
+ * For the landmarker to work, you need to create an app on
+ * https://www.dropbox.com/developers/apps
+ * - Choose "Scoped access" and "Full dropbox" access type
+ * - In the "Permissions" tab, enable "files.content.read",
+ *   "files.content.write", "files.metadata.read" and "sharing.read"
+ * permissions
+ * - In the "Settings" tab, add your deployment URL to the
+ *   "Redirect URIs" list, e.g. "http://localhost:4000/",
+ *   "https://landmarker.3dlook.me/"
+ *
+ * Then replace the API_KEY value below with your app key.
+ */
+const API_KEY = 'vdq751j28vu5efg',
     API_URL = 'https://api.dropboxapi.com/2',
     CONTENTS_URL = 'https://content.dropboxapi.com/2';
 

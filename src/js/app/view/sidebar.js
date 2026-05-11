@@ -141,11 +141,12 @@ export const LandmarkGroupView = Backbone.View.extend({
 
     tagName: 'div',
 
-    initialize: function({labelIndex}) {
+    initialize: function({labelIndex, type}) {
         _.bindAll(this, 'render');
         this.landmarkList = null;
         this.label = null;
         this.labelIndex = labelIndex;
+        this.type = type;
         this.render();
     },
 
@@ -157,8 +158,12 @@ export const LandmarkGroupView = Backbone.View.extend({
         let points = this.model.landmarks.length;
 
         showNewElements();
+        showAdditionalElements();
         if(points != 93 && points != 68) {
             hideNewElements();
+        }
+        if (this.type == "hand") {
+            hideAdditionalElements();
         }
 
         this.landmarkList = new LandmarkListView(
@@ -214,7 +219,7 @@ export const LandmarkGroupListView = Backbone.View.extend({
     },
 
     renderOne: function(label, labelIndex) {
-        const group = new LandmarkGroupView({model: label, labelIndex});
+        const group = new LandmarkGroupView({model: label, labelIndex, type: this.model});
         // reset the view's element to it's template
         this.$el.append(group.render().$el);
         this.groups.push(group);
@@ -254,8 +259,6 @@ export const ActionsView = Backbone.View.extend({
     },
 
     save: function (evt) {
-
-
         let gender = this.app.getGender();
         let typeOfPhoto = this.app.getTypeOfPhoto();
         const age = this.app.getAge();
@@ -281,7 +284,7 @@ export const ActionsView = Backbone.View.extend({
                 && wearHips && wearLowHips && wearThigh && wearKnee && wearCalf && wearAnkle;
         }
 
-        if (firstConditionPart && secondConditionPart) {
+        if ((firstConditionPart && secondConditionPart) || lmg.type == "hand") {
             evt.stopPropagation();
             $("#assetPager").find("#next").prop("disabled", false);
 
@@ -796,6 +799,16 @@ function hideNewElements() {
     $('#wearAnkleRow').hide();
 }
 
+function showAdditionalElements() {
+    $('#typeOfPhotoRows').show();
+    $('#genderRows').show();
+}
+
+function hideAdditionalElements() {
+    $('#typeOfPhotoRows').hide();
+    $('#genderRows').hide();
+}
+
 export default Backbone.View.extend({
 
     initialize: function () {
@@ -835,7 +848,7 @@ export default Backbone.View.extend({
         this.actionsView = new ActionsView({model: lms, app: this.model});
         this.lmLoadView = new LmLoadView({model: lms, app: this.model});
         this.undoRedoView = new UndoRedoView({model: lms});
-        this.lmView = new LandmarkGroupListView({collection: lms.labels});
+        this.lmView = new LandmarkGroupListView({collection: lms.labels, model: this.model.activeTemplate()});
         this.genderToggle = new GenderToggle({model: this.model});
         this.typeOfPhotoToggle = new TypeOfPhotoToggle({model: this.model});
         this.ageSelect = new AgeSelect({model: this.model});

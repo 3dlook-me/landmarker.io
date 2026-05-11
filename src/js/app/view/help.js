@@ -18,6 +18,8 @@ const HELP_CONTENTS = [
     ['q / ESC', 'clear current selection'],
     ['y', 'redo last undone operation'],
     ['ctrl + s', 'save current landmarks'],
+    ['ctrl + z', 'undo last operation'],
+    ['ctrl + y', 'redo last operation'],
     ['click outside', 'clear current selection'],
     ['ctrl/cmd + click on landmark', 'select and deselect from current selection'],
     ['click on a landmark', 'select a landmark'],

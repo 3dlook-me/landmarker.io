@@ -279,9 +279,15 @@ function handleNewVersion () {
 document.addEventListener('DOMContentLoaded', function () {
 
     // Check for new version (vs current appcache retrieved version)
-    window.applicationCache.addEventListener('updateready', handleNewVersion);
-    if(window.applicationCache.status === window.applicationCache.UPDATEREADY) {
-        handleNewVersion();
+    if (window.applicationCache && typeof window.applicationCache.addEventListener === 'function') {
+        window.applicationCache.addEventListener('updateready', handleNewVersion);
+        try {
+            if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
+                handleNewVersion();
+            }
+        } catch (e) {
+            // Some environments may throw when accessing status; ignore and continue.
+        }
     }
 
     // Test for IE
