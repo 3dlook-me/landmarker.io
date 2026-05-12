@@ -8,6 +8,7 @@ import Tracker from '../lib/tracker';
 import { atomicOperation } from './atomic';
 import _ from 'underscore';
 import Landmark from './landmark';
+import { TEMPLATE_NAMES } from '../consts';
 
 // Define behavior shared between Lists and Groups
 const LandmarkCollectionPrototype = Object.create(null);
@@ -87,12 +88,14 @@ LandmarkLabel.prototype.toJSON = function () {
 
 // LandmarkGroup is the container for all the landmarks for a single asset.
 export default function LandmarkGroup (
-    points, connectivity, bad, invisible, labels, id, type, server, tracker
+    points, connectivity, bad, invisible, labels, wear, handSide, id, type, server, tracker
 ) {
     this.id = id;
     this.type = type;
     this.server = server;
-    this.tracker = tracker || new Tracker();
+    this.wear = wear || {};
+    this.handSide = handSide;
+    this.tracker = new Tracker();
     // 1. Build landmarks from points
     this.landmarks = points.map((p, index) => {
         //p - x,y coord of point
@@ -266,18 +269,52 @@ LandmarkGroup.prototype.toJSON = function () {
         gender: null,
         typeOfPhoto: null,
         age: null,
-        wear: {},
+        wear: this.wear,
+        handSide: this.handSide,
         version: 3,
     };
 };
 
+function swapElements(arr, index1, index2) {
+    if (index1 < 0 || index1 >= arr.length ||
+        index2 < 0 || index2 >= arr.length) {
+        throw new Error("Invalid indexes");
+    }
 
-LandmarkGroup.prototype.save = function (gender, typeOfPhoto, age, wear) {
+    [arr[index1], arr[index2]] = [arr[index2], arr[index1]];
+
+    return arr;
+}
+
+function transformByHandSide(json, handSide) {
+    const transformed = {
+        ...json,
+        landmarks: {
+            ...json.landmarks,
+            points: json.landmarks.points.map(point => [...point]),
+        }
+    };
+
+    if (handSide === 'left') {
+        swapElements(transformed.landmarks.points, 0, 1);
+        swapElements(transformed.landmarks.points, 2, 3);
+        swapElements(transformed.landmarks.points, 4, 5);
+        swapElements(transformed.landmarks.points, 6, 7);
+    }
+
+    return transformed;
+}
+
+LandmarkGroup.prototype.save = function (gender, typeOfPhoto, age, wear, handSide, activeTemplate) {
     let json = this.toJSON();
+    if (activeTemplate === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
+        json = transformByHandSide(json, handSide);
+    }
     json.gender = gender;
     json.typeOfPhoto = typeOfPhoto;
     json.age = age;
     json.wear = wear;
+    json.handSide = handSide;
     return this.server
         .saveLandmarkGroup(this.id, this.type, json, gender, typeOfPhoto, age)
         .then(() => {
@@ -463,12 +500,17 @@ LandmarkGroup.prototype.completeGroups = function () {
 };
 
 LandmarkGroup.parse = function (json, id, type, server, tracker) {
+    if (type === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
+        json = transformByHandSide(json, json.handSide);
+    }
     return new LandmarkGroup(
         json.landmarks.points,
         json.landmarks.connectivity,
         json.landmarks.bad,
         json.landmarks.invisible,
         json.labels,
+        json.wear,
+        json.handSide,
         id,
         type,
         server,

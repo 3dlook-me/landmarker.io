@@ -3,6 +3,7 @@
 import _ from 'underscore';
 import THREE from 'three';
 import Backbone from 'backbone';
+import { TEMPLATE_NAMES } from '../../consts';
 
 // the default scale for 1.0
 const LM_SCALE = 0.01;
@@ -41,6 +42,7 @@ export const LandmarkTHREEView = Backbone.View.extend({
         this.listenTo(this.app, "change:landmarkSize", this.changeLandmarkSize);
         this.symbol = null; // a THREE object that represents this landmark.
         this.spritey = null; // a THREE object that represents this landmark.
+        this.groupLabel = null; // a THREE object that represents this landmark.
         // null if the landmark isEmpty
         this.render();
     },
@@ -58,18 +60,49 @@ export const LandmarkTHREEView = Backbone.View.extend({
         } else {
             // there is no symbol yet
             if (!this.model.isEmpty()) {
+                const groupType = this.model.attributes.group.type;
                 // and there should be! Make it and update it
                 this.symbol = this.createSphere(this.model.get('point'), true);
                 this.spritey = this.createTextSprite(this.model.get('index'), {
                     fontsize: 60,
                     fontface: "Georgia",
+                    backgroundColor: {
+                        r: 255,
+                        g: 75,
+                        b: 255,
+                        a: 1.0,
+                    }
                 });
+
+                if (groupType === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
+                    const id = this.model.cid;
+                    const labels = this.model.attributes.group.labels
+                    const groupLabelText = labels
+                        .find(({landmarks}) => landmarks
+                            .find(({cid}) => cid === id)
+                        ).label
+
+                    this.groupLabel = this.createTextSprite(groupLabelText, {
+                        fontsize: 120,
+                        fontface: "Georgia",
+                        backgroundColor: {
+                            r: 255,
+                            g: 255,
+                            b: 75,
+                            a: 1.0,
+                        }
+                    });
+                }
+
                 this.updateSymbol();
                 // trigger changeLandmarkSize to make sure sizing is correct
                 this.changeLandmarkSize();
                 // and add it to the scene
                 this.viewport.sLms.add(this.symbol);
                 this.viewport.sLms.add(this.spritey);
+                if (groupType === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
+                    this.viewport.sLms.add(this.groupLabel);
+                }
             }
         }
         // tell our viewport to update
@@ -112,7 +145,7 @@ export const LandmarkTHREEView = Backbone.View.extend({
         var context = canvas.getContext('2d');
         context.font = "Bold " + fontsize + "px " + fontface;
 
-        // background color
+        // text color
         context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
                                         + backgroundColor.b + "," + backgroundColor.a + ")";
         // border color
@@ -120,9 +153,6 @@ export const LandmarkTHREEView = Backbone.View.extend({
                                         + borderColor.b + "," + borderColor.a + ")";
 
         context.lineWidth = borderThickness;
-
-        // text color
-        context.fillStyle = "rgba(255, 75, 255, 1.0)";
 
         context.fillText(message, borderThickness, fontsize + borderThickness);
 
@@ -143,6 +173,11 @@ export const LandmarkTHREEView = Backbone.View.extend({
         this.symbol.material = lmMaterialForSelected[selected];
         this.spritey.position.copy(this.model.point());
 
+        const groupType = this.model.attributes.group.type;
+        if (groupType === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
+            this.groupLabel.position.copy(this.model.point());
+        }
+
         if (selected) {
             this.spritey.visible = true;
         } else {
@@ -158,6 +193,10 @@ export const LandmarkTHREEView = Backbone.View.extend({
         if (this.spritey) {
             this.viewport.sLms.remove(this.spritey);
             this.spritey = null;
+        }
+        if (this.groupLabel) {
+            this.viewport.sLms.remove(this.groupLabel);
+            this.groupLabel = null;
         }
     },
 

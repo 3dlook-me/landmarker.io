@@ -178,8 +178,8 @@ let _defaults;
 Template.loadDefaultTemplates = function () {
     if (!_defaults) {
         _defaults = {};
-        Object.keys(defaults).forEach(key => {
-            _defaults[key] = new Template(defaults[key]);
+        defaults.forEach(tmpl => {
+            _defaults[tmpl.name] = new Template(tmpl.template);
         });
     }
     return _defaults;

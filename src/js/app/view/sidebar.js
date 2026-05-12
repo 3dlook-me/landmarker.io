@@ -7,6 +7,8 @@ import $ from 'jquery';
 import download from '../lib/download';
 import atomic from '../model/atomic';
 import TemplatePanel from './templates';
+import { HAND_TEMPLATES, TEMPLATE_NAMES } from '../consts';
+import { isValidToSave } from '../utils';
 
 // Renders a single Landmark. Should update when constituent landmark
 // updates and that's it.
@@ -162,8 +164,14 @@ export const LandmarkGroupView = Backbone.View.extend({
         if(points != 93 && points != 68) {
             hideNewElements();
         }
-        if (this.type == "hand") {
+        if (HAND_TEMPLATES.includes(this.type)) {
             hideAdditionalElements();
+        }
+
+        if (this.type === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
+            showHandSideElements();
+        } else {
+            hideHandSideElements();
         }
 
         this.landmarkList = new LandmarkListView(
@@ -259,8 +267,8 @@ export const ActionsView = Backbone.View.extend({
     },
 
     save: function (evt) {
-        let gender = this.app.getGender();
-        let typeOfPhoto = this.app.getTypeOfPhoto();
+        const gender = this.app.getGender();
+        const typeOfPhoto = this.app.getTypeOfPhoto();
         const age = this.app.getAge();
         const wearBiceps = this.app.getWearBiceps();
         const wearChest = this.app.getWearChest();
@@ -272,36 +280,55 @@ export const ActionsView = Backbone.View.extend({
         const wearKnee = this.app.getWearKnee();
         const wearCalf = this.app.getWearCalf();
         const wearAnkle = this.app.getWearAnkle();
-        const lmg = this.app.getLandmarks();
+        const handSide = this.app.getHandSide();
+        const lmg = this.app.getLandmarks()
+        const type = lmg.type;
+        const numberOfPoints = lmg.landmarks.length;
 
-        const points = lmg.landmarks.length;
+        const isValid = isValidToSave({
+            gender,
+            typeOfPhoto,
+            age,
+            wearBiceps,
+            wearChest,
+            wearUnderChest,
+            wearWaist,
+            wearHips,
+            wearLowHips,
+            wearThigh,
+            wearKnee,
+            wearCalf,
+            wearAnkle,
+            handSide,
+            numberOfPoints,
+            type,
+        });
 
-        const firstConditionPart = gender && (typeOfPhoto || typeOfPhoto == "");
-        let secondConditionPart = true;
-
-        if(points === 93 || points === 68) {
-            secondConditionPart = age && wearBiceps && wearChest && wearUnderChest && wearWaist
-                && wearHips && wearLowHips && wearThigh && wearKnee && wearCalf && wearAnkle;
-        }
-
-        if ((firstConditionPart && secondConditionPart) || lmg.type == "hand") {
+        if (isValid) {
             evt.stopPropagation();
             $("#assetPager").find("#next").prop("disabled", false);
 
             $("#genderPanel").find("#errorRadio").removeClass('error-msg-show')
             this.$el.find('#save').addClass('Button--Disabled');
-            this.model.save(gender, typeOfPhoto, age, {
-                biceps: wearBiceps,
-                chest: wearChest,
-                under_chest: wearUnderChest,
-                waist: wearWaist,
-                hips: wearHips,
-                low_hips: wearLowHips,
-                thigh: wearThigh,
-                knee: wearKnee,
-                calf: wearCalf,
-                ankle: wearAnkle,
-            }).then(() => {
+            this.model.save(
+                gender,
+                typeOfPhoto,
+                age,
+                {
+                    biceps: wearBiceps,
+                    chest: wearChest,
+                    under_chest: wearUnderChest,
+                    waist: wearWaist,
+                    hips: wearHips,
+                    low_hips: wearLowHips,
+                    thigh: wearThigh,
+                    knee: wearKnee,
+                    calf: wearCalf,
+                    ankle: wearAnkle,
+                },
+                handSide,
+                this.app.activeTemplate()
+            ).then(() => {
                 this.$el.find('#save').removeClass('Button--Disabled');
             }, () => {
                 this.$el.find('#save').removeClass('Button--Disabled');
@@ -457,6 +484,7 @@ export const TypeOfPhotoToggle = Backbone.View.extend({
 
     render: function () {
         let typeOfPhoto = this.model.getTypeOfPhoto();
+        let activeTemplate = this.model.activeTemplate();
         let gender = this.model.getGender();
 
         if (typeOfPhoto == ".s") {
@@ -468,7 +496,7 @@ export const TypeOfPhotoToggle = Backbone.View.extend({
             $("#usual").prop("checked", false)
         }
 
-        if ((typeOfPhoto || gender) == undefined ) {
+        if ((typeOfPhoto || gender) == undefined && !HAND_TEMPLATES.includes(activeTemplate)) {
             $("#assetPager").find("#next").prop("disabled", true);
         } else {
             $("#assetPager").find("#next").prop("disabled", false);
@@ -771,6 +799,46 @@ export const WearAnkleSelect = Backbone.View.extend({
 
 });
 
+export const HandToggle = Backbone.View.extend({
+    el: '#handSideRow',
+
+    events: {
+        'click #left-hand': "clickedLeftHand",
+        'click #right-hand': "clickedRightHand"
+
+    },
+
+    initialize: function ({app}) {
+        this.listenTo(this.model, "change", this.render);
+
+        this.app = app;
+        _.bindAll(this, 'render', 'clickedLeftHand', 'clickedRightHand');
+        this.render();
+    },
+
+
+    render: function () {
+        let handSide = this.model.getHandSide();
+        if (handSide === 'left') {
+            $("#left-hand").prop("checked", true);
+        } else if (handSide === 'right') {
+            $("#right-hand").prop("checked", true);
+        } else {
+            $("#left-hand").prop("checked", false)
+            $("#right-hand").prop("checked", false)
+        }
+    },
+
+    clickedLeftHand: function () {
+        console.log("clickedLeftHand");
+        this.model.setHandSide('left');
+    },
+    clickedRightHand: function () {
+        console.log("clickedRightHand");
+        this.model.setHandSide('right');
+    }
+});
+
 function showNewElements() {
     $('#ageRow').show();
     $('#wearBicepsRow').show();
@@ -807,6 +875,14 @@ function showAdditionalElements() {
 function hideAdditionalElements() {
     $('#typeOfPhotoRows').hide();
     $('#genderRows').hide();
+}
+
+function showHandSideElements() {
+    $('#handSideRow').show();
+}
+
+function hideHandSideElements() {
+    $('#handSideRow').hide();
 }
 
 export default Backbone.View.extend({
@@ -862,6 +938,7 @@ export default Backbone.View.extend({
         this.wearKneeSelect = new WearKneeSelect({model: this.model});
         this.wearCalfSelect = new WearCalfSelect({model: this.model});
         this.wearAnkleSelect = new WearAnkleSelect({model: this.model});
+        this.handSelect = new HandToggle({model: this.model});
         $('#landmarksPanel').html(this.lmView.render().$el);
     }
 });
