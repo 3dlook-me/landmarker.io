@@ -168,12 +168,6 @@ export const LandmarkGroupView = Backbone.View.extend({
             hideAdditionalElements();
         }
 
-        if (this.type === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
-            showHandSideElements();
-        } else {
-            hideHandSideElements();
-        }
-
         this.landmarkList = new LandmarkListView(
             {collection: this.model.landmarks, labelIndex: this.labelIndex});
         this.label = new LandmarkGroupLabelView({model: this.model});
@@ -280,7 +274,6 @@ export const ActionsView = Backbone.View.extend({
         const wearKnee = this.app.getWearKnee();
         const wearCalf = this.app.getWearCalf();
         const wearAnkle = this.app.getWearAnkle();
-        const handSide = this.app.getHandSide();
         const lmg = this.app.getLandmarks()
         const type = lmg.type;
         const numberOfPoints = lmg.landmarks.length;
@@ -299,7 +292,6 @@ export const ActionsView = Backbone.View.extend({
             wearKnee,
             wearCalf,
             wearAnkle,
-            handSide,
             numberOfPoints,
             type,
         });
@@ -326,7 +318,6 @@ export const ActionsView = Backbone.View.extend({
                     calf: wearCalf,
                     ankle: wearAnkle,
                 },
-                handSide,
                 this.app.activeTemplate()
             ).then(() => {
                 this.$el.find('#save').removeClass('Button--Disabled');
@@ -799,46 +790,6 @@ export const WearAnkleSelect = Backbone.View.extend({
 
 });
 
-export const HandToggle = Backbone.View.extend({
-    el: '#handSideRow',
-
-    events: {
-        'click #left-hand': "clickedLeftHand",
-        'click #right-hand': "clickedRightHand"
-
-    },
-
-    initialize: function ({app}) {
-        this.listenTo(this.model, "change", this.render);
-
-        this.app = app;
-        _.bindAll(this, 'render', 'clickedLeftHand', 'clickedRightHand');
-        this.render();
-    },
-
-
-    render: function () {
-        let handSide = this.model.getHandSide();
-        if (handSide === 'left') {
-            $("#left-hand").prop("checked", true);
-        } else if (handSide === 'right') {
-            $("#right-hand").prop("checked", true);
-        } else {
-            $("#left-hand").prop("checked", false)
-            $("#right-hand").prop("checked", false)
-        }
-    },
-
-    clickedLeftHand: function () {
-        console.log("clickedLeftHand");
-        this.model.setHandSide('left');
-    },
-    clickedRightHand: function () {
-        console.log("clickedRightHand");
-        this.model.setHandSide('right');
-    }
-});
-
 function showNewElements() {
     $('#ageRow').show();
     $('#wearBicepsRow').show();
@@ -875,14 +826,6 @@ function showAdditionalElements() {
 function hideAdditionalElements() {
     $('#typeOfPhotoRows').hide();
     $('#genderRows').hide();
-}
-
-function showHandSideElements() {
-    $('#handSideRow').show();
-}
-
-function hideHandSideElements() {
-    $('#handSideRow').hide();
 }
 
 export default Backbone.View.extend({
@@ -938,7 +881,6 @@ export default Backbone.View.extend({
         this.wearKneeSelect = new WearKneeSelect({model: this.model});
         this.wearCalfSelect = new WearCalfSelect({model: this.model});
         this.wearAnkleSelect = new WearAnkleSelect({model: this.model});
-        this.handSelect = new HandToggle({model: this.model});
         $('#landmarksPanel').html(this.lmView.render().$el);
     }
 });

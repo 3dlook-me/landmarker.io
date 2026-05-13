@@ -32,7 +32,6 @@ export default Backbone.Model.extend({
             wearKnee: undefined,
             wearCalf: undefined,
             wearAnkle: undefined,
-            handSide: 'left',
 
             connectivityOn: true,
             editingOn: true,
@@ -56,12 +55,6 @@ export default Backbone.Model.extend({
     },
     setGender: function (gender) {
         return this.set('gender', gender);
-    },
-    getHandSide: function () {
-        return this.get('handSide');
-    },
-    setHandSide: function (handSide) {
-        return this.set('handSide', handSide);
     },
     setTypeOfPhoto: function (typeOfPhoto) {
         return this.set('typeOfPhoto', typeOfPhoto);
@@ -392,7 +385,6 @@ export default Backbone.Model.extend({
         const wearKnee = this.getWearKnee();
         const wearCalf = this.getWearCalf();
         const wearAnkle = this.getWearAnkle();
-        const handSide = this.getHandSide();
         const lms = this.getLandmarks();
         const type = lms && lms.type;
         const numberOfPoints = lms && lms.landmarks && lms.landmarks.length;
@@ -411,7 +403,6 @@ export default Backbone.Model.extend({
             wearKnee,
             wearCalf,
             wearAnkle,
-            handSide,
             numberOfPoints,
             type,
         });
@@ -437,7 +428,6 @@ export default Backbone.Model.extend({
                         calf: wearCalf,
                         ankle: wearAnkle,
                     },
-                    handSide,
                     this.activeTemplate()
                 ).then(fn);
             }
@@ -487,9 +477,6 @@ export default Backbone.Model.extend({
                 this.setWearKnee(json.wear.knee);
                 this.setWearCalf(json.wear.calf);
                 this.setWearAnkle(json.wear.ankle);
-            }
-            if (json.handSide) {
-                this.setHandSide(json.handSide);
             }
             return LandmarkGroup.parse(
                 json,
@@ -578,9 +565,6 @@ export default Backbone.Model.extend({
                         this.setWearKnee(json.wear.knee);
                         this.setWearCalf(json.wear.calf);
                         this.setWearAnkle(json.wear.ankle);
-                    }
-                    if (json.handSide) {
-                        this.setHandSide(json.handSide);
                     }
                     lms.tracker.recordState(lms.toJSON());
                     // adjust points to be within image bounds
