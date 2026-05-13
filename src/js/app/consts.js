@@ -1,0 +1,8 @@
+export const TEMPLATE_NAMES = {
+    FRONT_TEMPLATE: 'frontal',
+    SIDE_TEMPLATE: 'side',
+    HAND_TEMPLATE: 'hand',
+    NEW_HAND_TEMPLATE: 'hand 2.0',
+}
+
+export const HAND_TEMPLATES = [TEMPLATE_NAMES.HAND_TEMPLATE, TEMPLATE_NAMES.NEW_HAND_TEMPLATE];
