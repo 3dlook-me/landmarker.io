@@ -15,7 +15,6 @@ export function isValidToSave(params) {
         wearKnee,
         wearCalf,
         wearAnkle,
-        handSide,
         numberOfPoints,
         type,
     } = params;
@@ -28,5 +27,5 @@ export function isValidToSave(params) {
             && wearHips && wearLowHips && wearThigh && wearKnee && wearCalf && wearAnkle;
     }
 
-    return (firstConditionPart && secondConditionPart) || (type === TEMPLATE_NAMES.HAND_TEMPLATE) || (type === TEMPLATE_NAMES.NEW_HAND_TEMPLATE && handSide);
+    return (firstConditionPart && secondConditionPart) || (type === TEMPLATE_NAMES.HAND_TEMPLATE) || (type === TEMPLATE_NAMES.NEW_HAND_TEMPLATE);
 }
