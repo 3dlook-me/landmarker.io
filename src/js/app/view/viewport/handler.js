@@ -521,6 +521,13 @@ export default function Handler () {
 
         groupSelected = _val;
 
+        // if 'g' key was pressed while holding left mouse button
+        // recreate dragStartPositions in order to avoid crash
+        if (groupSelected) {
+            dragStartPositions = this.model.landmarks().selected().map(
+                lm => [lm.get('index'), lm.point().clone()]);
+        }
+
         if (_val) {
             // Use keydown as keypress doesn't register arrows in some context
             $(window).on('keydown', onKeypress);
