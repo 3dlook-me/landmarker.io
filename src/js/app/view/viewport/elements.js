@@ -7,6 +7,10 @@ import { TEMPLATE_NAMES } from '../../consts';
 
 // the default scale for 1.0
 const LM_SCALE = 0.01;
+const LABEL_X_OFFSET = 15;
+const LABEL_Y_OFFSET = 0;
+const INDEX_X_OFFSET = -15;
+const INDEX_Y_OFFSET = 0;
 
 const LM_SPHERE_PARTS = 10;
 const LM_SPHERE_SELECTED_COLOR = 0xff75ff;
@@ -71,7 +75,8 @@ export const LandmarkTHREEView = Backbone.View.extend({
                         g: 75,
                         b: 255,
                         a: 1.0,
-                    }
+                    },
+                    center: {x: 0.5, y: 0}
                 });
 
                 if (groupType === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
@@ -90,7 +95,8 @@ export const LandmarkTHREEView = Backbone.View.extend({
                             g: 255,
                             b: 75,
                             a: 1.0,
-                        }
+                        },
+                        center: {x: 0.5, y: 1}
                     });
                 }
 
@@ -141,6 +147,9 @@ export const LandmarkTHREEView = Backbone.View.extend({
         var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
             parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
 
+        var center = parameters.hasOwnProperty("center") ?
+            parameters["center"] : { x: 0.5, y: 0.5 };
+
         var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         context.font = "Bold " + fontsize + "px " + fontface;
@@ -163,6 +172,9 @@ export const LandmarkTHREEView = Backbone.View.extend({
         var spriteMaterial = new THREE.SpriteMaterial(
             { map: texture, useScreenCoordinates: false } );
         var sprite = new THREE.Sprite( spriteMaterial );
+        if (sprite.center && typeof sprite.center.set === 'function') {
+            sprite.center.set(center.x, center.y);
+        }
         sprite.scale.set(100,50,1.0);
         return sprite;
     },
@@ -171,11 +183,14 @@ export const LandmarkTHREEView = Backbone.View.extend({
         this.symbol.position.copy(this.model.point());
         var selected = this.model.isSelected();
         this.symbol.material = lmMaterialForSelected[selected];
+
         this.spritey.position.copy(this.model.point());
 
         const groupType = this.model.attributes.group.type;
         if (groupType === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
             this.groupLabel.position.copy(this.model.point());
+            this.groupLabel.position.x += LABEL_X_OFFSET;
+            this.groupLabel.position.y -= LABEL_Y_OFFSET;
         }
 
         if (selected) {

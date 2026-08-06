@@ -9,7 +9,45 @@ import Tracker from '../lib/tracker';
 import * as AssetSource from './assetsource';
 import LandmarkGroup from './landmark_group';
 import Modal from '../view/modal';
+import Template from '../template';
 import { isValidToSave } from '../utils';
+
+function mergeSavedLandmarkJsonWithTemplate(json, template) {
+    if (!json || !template) {
+        return json;
+    }
+
+    const defaultLjson = template.emptyLJSON();
+    const savedLandmarks = json.landmarks || {};
+    const savedPoints = Array.isArray(savedLandmarks.points) ? savedLandmarks.points : [];
+    const savedInvisible = Array.isArray(savedLandmarks.invisible) ? savedLandmarks.invisible : [];
+    const savedBad = Array.isArray(savedLandmarks.bad) ? savedLandmarks.bad : [];
+
+    const points = defaultLjson.landmarks.points.map((point, index) => {
+        return index < savedPoints.length ? savedPoints[index] : point;
+    });
+    const invisible = defaultLjson.landmarks.points.map((_, index) => {
+        return index < savedInvisible.length ? savedInvisible[index] : false;
+    });
+    const bad = defaultLjson.landmarks.points.map((_, index) => {
+        return index < savedBad.length ? savedBad[index] : false;
+    });
+
+    return {
+        labels: defaultLjson.labels,
+        gender: json.gender,
+        typeOfPhoto: json.typeOfPhoto,
+        age: json.age,
+        wear: json.wear || {},
+        version: json.version || defaultLjson.version,
+        landmarks: {
+            connectivity: defaultLjson.landmarks.connectivity,
+            points,
+            invisible,
+            bad
+        }
+    };
+}
 
 export default Backbone.Model.extend({
 
@@ -478,8 +516,12 @@ export default Backbone.Model.extend({
                 this.setWearCalf(json.wear.calf);
                 this.setWearAnkle(json.wear.ankle);
             }
+
+            const template = Template.loadDefaultTemplates()[this.activeTemplate()];
+            const mergedJson = template ? mergeSavedLandmarkJsonWithTemplate(json, template) : json;
+
             return LandmarkGroup.parse(
-                json,
+                mergedJson,
                 this.asset().id,
                 this.activeTemplate(),
                 this.server(),
@@ -567,10 +609,14 @@ export default Backbone.Model.extend({
                         this.setWearAnkle(json.wear.ankle);
                     }
                     lms.tracker.recordState(lms.toJSON());
+
+                    const template = Template.loadDefaultTemplates()[this.activeTemplate()];
+                    const mergedJson = template ? mergeSavedLandmarkJsonWithTemplate(json, template) : json;
+
                     // adjust points to be within image bounds
                     var image = this.asset().texture.map.image;
-                    for (let i = 0; i < json.landmarks.points.length; i++) {
-                        const p = json.landmarks.points[i];
+                    for (let i = 0; i < mergedJson.landmarks.points.length; i++) {
+                        const p = mergedJson.landmarks.points[i];
 
                         if (p[1] > image.width) {
                             p[1] = image.width;
@@ -580,7 +626,7 @@ export default Backbone.Model.extend({
                             p[0] = image.height;
                         }
                     }
-                    lms.restore(json, true);
+                    lms.restore(mergedJson, true);
                     lms.tracker.recordState(lms.toJSON(), false, true);
                 }, () => {
                     console.log('Error in fetching landmark JSON file');

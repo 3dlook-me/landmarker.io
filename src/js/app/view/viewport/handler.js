@@ -76,7 +76,7 @@ export default function Handler () {
     var positionLmDrag = new THREE.Vector2();
     // vector difference in one time step
     var deltaLmDrag = new THREE.Vector2();
-    var dragStartPositions, dragged = false;
+    var dragged = false;
 
     var intersectsWithLms, intersectsWithMesh;
 
@@ -142,8 +142,6 @@ export default function Handler () {
 
         // record the position of where the drag started.
         positionLmDrag.copy(this.localToScreen(lmPressed.point()));
-        dragStartPositions = this.model.landmarks().selected().map(
-            lm => [lm.get('index'), lm.point().clone()]);
 
         // start listening for dragging landmarks
         $(document).on('mousemove.landmarkDrag', landmarkOnDrag);
@@ -384,15 +382,14 @@ export default function Handler () {
                 setGroupSelected(true);
             }
         } else if (dragged) {
-            this.model.landmarks().selected().forEach((lm, i) => {
-                dragStartPositions[i].push(lm.point().clone());
-            });
-            this.model.landmarks().tracker.record(dragStartPositions);
+            var dragPositions = this.model.landmarks().selected().map(
+                lm => [lm.get('index'), lm.point().clone()]);
+
+            this.model.landmarks().tracker.record(dragPositions);
         }
 
         // this.clearCanvas();
         dragged = false;
-        dragStartPositions = [];
         isPressed = false;
     });
 
@@ -400,7 +397,6 @@ export default function Handler () {
     // ------------------------------------------------------------------------
 
     var onMouseMove = (evt) => {
-
         this.clearCanvas();
 
         if (isPressed ||
@@ -520,13 +516,6 @@ export default function Handler () {
         }
 
         groupSelected = _val;
-
-        // if 'g' key was pressed while holding left mouse button
-        // recreate dragStartPositions in order to avoid crash
-        if (groupSelected) {
-            dragStartPositions = this.model.landmarks().selected().map(
-                lm => [lm.get('index'), lm.point().clone()]);
-        }
 
         if (_val) {
             // Use keydown as keypress doesn't register arrows in some context
