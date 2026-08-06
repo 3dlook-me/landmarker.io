@@ -185,8 +185,6 @@ export const LandmarkTHREEView = Backbone.View.extend({
         this.symbol.material = lmMaterialForSelected[selected];
 
         this.spritey.position.copy(this.model.point());
-        this.spritey.position.x += INDEX_X_OFFSET;
-        this.spritey.position.y += INDEX_Y_OFFSET;
 
         const groupType = this.model.attributes.group.type;
         if (groupType === TEMPLATE_NAMES.NEW_HAND_TEMPLATE) {
