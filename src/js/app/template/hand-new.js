@@ -46,6 +46,22 @@ export default {
                 '2 3',
                 '3 0',
             ]
+        },
+        {
+            'label': 'i',
+            'points': 1,
+            'connectivity':
+                [
+                    '0 0',
+                ]
+        },
+        {
+            'label': 'm',
+            'points': 1,
+            'connectivity':
+                [
+                    '0 0',
+                ]
         }
     ]
 };
